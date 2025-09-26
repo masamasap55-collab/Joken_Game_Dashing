@@ -5,6 +5,7 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+userSettings/
 
 # Auto-generated VS/MonoDevelop files
 *.csproj
