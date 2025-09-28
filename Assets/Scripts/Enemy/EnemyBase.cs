@@ -25,7 +25,7 @@ public class EnemyBase : MonoBehaviour
     [Header("ボス敵フラグ(ONでボス敵として扱う。1ステージに1体のみ)")] public bool isBoss;
     //その他データ
     [HideInInspector] public int nowHP; //残りHP
-    [HideInInspector] public bool isVanishing; //消滅フラグ trueで消滅中
+    [HideInInspector] public bool isVanishing = false; //消滅フラグ trueで消滅中
     [HideInInspector] public bool isInvis; //無敵モード
     [HideInInspector] public bool rightFacing; //右向きフラグ(falseで左向き)
 

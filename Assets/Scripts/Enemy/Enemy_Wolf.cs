@@ -53,11 +53,13 @@ public class Enemy_Wolf : EnemyBase
             return;
         }
 
-        // 壁にぶつかったら向き変更
+        // 壁にぶつかったら向き変更 ((((velocity判定だと安定しないため別の方法で作成))))
         if (rightFacing && rigidbody2D.velocity.x <= 0.0f)
             SetFacingRight(false);
-        else if (!rightFacing && rigidbody2D.velocity.x >= 0.0f)
+        else if (!rightFacing && rigidbody2D.velocity.x >= -0.0f)
             SetFacingRight(true);
+        
+
 
         //　横移動(等速)
         float xSpeed = movingSpeed;
