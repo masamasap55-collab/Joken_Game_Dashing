@@ -18,6 +18,10 @@ public class ActorController : MonoBehaviour
     public CameraController cameraController; //カメラ制御クラス (今回はGetComponentをしてないのでこの変数にInspectorからセット参照してる)
     public GameObject weaponBulletPrefab; //弾プレハブ
 
+    //設定項目
+    [Header("true:足滑るモード")]
+    public bool icyGroundMode;
+
     //　体力変数
     [HideInInspector] public int nowHP; // 現在HP
     [HideInInspector] public int maxHP; // 最大HP
@@ -107,7 +111,7 @@ public class ActorController : MonoBehaviour
             {
                 rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, 0.0f);
             }
-            if (Mathf.Abs(xSpeed) < 0.1f) //地上で移動を止めたらその場で止まる。
+            if (Mathf.Abs(xSpeed) < 0.1f && !icyGroundMode) //地上で移動を止めたらその場で止まる。
             {
                 rigidbody2D.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
             }
@@ -199,13 +203,16 @@ public class ActorController : MonoBehaviour
         Vector2 velocity = rigidbody2D.velocity;
         // 変数velocityのxベクトルにxSpeedの値を代入。
         velocity.x = xSpeed;
+        //　氷床ステージなら接地時に滑るような速度設定にする
+        if (icyGroundMode && groundSensor.isGround)
+            velocity.x = Mathf.Lerp(xSpeed, rigidbody2D.velocity.x, 0.99f);
 
         //水中モードでの速度
-        if (inWaterMode)
-        {
-            velocity.x *= WaterModeDeceletate_X;
-            velocity.y *= WaterModeDeceletate_Y;
-        }
+            if (inWaterMode)
+            {
+                velocity.x *= WaterModeDeceletate_X;
+                velocity.y *= WaterModeDeceletate_Y;
+            }
 
         // このオブジェクトのrigidbody2Dコンポーネントにvelocityを適応
             rigidbody2D.velocity = velocity;

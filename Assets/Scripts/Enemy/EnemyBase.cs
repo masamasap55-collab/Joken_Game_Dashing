@@ -23,6 +23,8 @@ public class EnemyBase : MonoBehaviour
     [Header("最大体力(初期体力)")] public int maxHP;
     [Header("接触時アクターへのダメージ")] public int touchDamage;
     [Header("ボス敵フラグ(ONでボス敵として扱う。1ステージに1体のみ)")] public bool isBoss;
+    [Header("ボス用被撃破パーティクルPrefab")] public GameObject bossDefeatParticlePrefab;
+
     //その他データ
     [HideInInspector] public int nowHP; //残りHP
     [HideInInspector] public bool isVanishing = false; //消滅フラグ trueで消滅中
@@ -65,6 +67,13 @@ public class EnemyBase : MonoBehaviour
         //このモンスターをアクティブ化
         gameObject.SetActive(true);
 
+        if (isBoss)
+        {
+            //BGM再生
+            areaManager.stageManager.PlayBossBGM();
+
+        }
+
     }
 
     /// <summary>
@@ -102,7 +111,11 @@ public class EnemyBase : MonoBehaviour
             // その他撃破時処理
             if (isBoss)
             { //ボス撃破
-
+              //　ボス撃破パーティクルを生成
+                var obj = Instantiate(bossDefeatParticlePrefab);
+                obj.transform.position = actorTransform.position;
+                //ゲームクリア処理
+                areaManager.stageManager.StageClear();
             }
             else
             { //ザコ撃破

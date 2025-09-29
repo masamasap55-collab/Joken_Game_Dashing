@@ -12,6 +12,8 @@ public class StageManager : MonoBehaviour
 
     [Header("初期エリアのAreaManager")]//このをつけるとinspectorのUIで見出しが出て分かりやすい
     public AreaManager initArea; //ステージ内の最初のエリア(初期エリア) これは参照セットする。
+    [Header("ボス戦用BGMのAudioClip")]
+    public AudioClip bossBGMClip;
 
     //　ステージ内の全エリアの配列(Startで取得)
     private AreaManager[] inStageAreas;
@@ -39,4 +41,32 @@ public class StageManager : MonoBehaviour
         foreach (var targetAreaManager in inStageAreas)
             targetAreaManager.gameObject.SetActive(false);
     }
+    /// <summary>
+    /// ボス戦用BGMを再生する
+    /// </summary>
+    public void PlayBossBGM()
+    {
+        // BGMを変更する
+        GetComponent<AudioSource>().clip = bossBGMClip; //セット
+        GetComponent<AudioSource>().Play(); //再生
+    }
+
+    /// <summary>
+    /// ステージクリア時処理
+    /// </summary>
+    public void StageClear()
+    {
+        //ステージクリア処理
+    }
+
+    /// <summary>
+    /// ゲームオーバー処理
+    /// </summary>
+    public void GameOver()
+    {
+        //ゲームオーバー処理
+    }
+
+
+
 }
