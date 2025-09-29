@@ -162,9 +162,6 @@ public class ActorController : MonoBehaviour
                 return;
             
             //ジャンプ力を計算
-                if (!groundSensor.isGround) //ActorGroundSensorからisGroundの変数を参照　
-                    return; //接してないなら終了
-
             float jumpPower = 10.0f;
             //rigidbody2Dの速度ベクトルにx軸、y軸のベクトルを新しく代入(jumpPowerは物理演算の重力の影響でどんどん下がっていく)
             rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpPower);
