@@ -31,12 +31,15 @@ public class ActorController : MonoBehaviour
     private float remainStuckTime; //残り硬直時間(0以上だと行動できない)
     private float invincibleTime; //残り無敵時間(秒)
     [HideInInspector] public bool isDefeat; // true:撃破された(ゲームオーバー)
+    [HideInInspector] public bool inWaterMode; //true:水中モード（メソッドから変更）
 
     //定数定義
     private const int InitialHP = 20; //　初期HP(最大HP)
     private const float InvicibleTime = 2.0f; // 被ダメージ直後の無敵時間(秒)
     private const float StuckTime = 0.5f; // 被ダメージ直後の硬直時間(秒)
     private const float KnockBack_X = 2.5f; // 被ダメージ時ノックバック(x方向)
+    private const float WaterModeDeceletate_X = 0.8f; // 水中でのX方向速度倍率
+    private const float WaterModeDeceletate_Y = 0.92f; //水中でのy方向速度倍率  
 
     // {Start} オブジェクト有効時　１回だけ実行されるメソッド
     void Start()
@@ -154,9 +157,13 @@ public class ActorController : MonoBehaviour
         //ジャンプ操作
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {//ジャンプ開始
-         //ジャンプ力を計算
-            if (!groundSensor.isGround) //ActorGroundSensorからisGroundの変数を参照　
-                return; //接してないなら終了
+            //接地していないなら終了(水中であれば続行)
+            if (!groundSensor.isGround && !inWaterMode)
+                return;
+            
+            //ジャンプ力を計算
+                if (!groundSensor.isGround) //ActorGroundSensorからisGroundの変数を参照　
+                    return; //接してないなら終了
 
             float jumpPower = 10.0f;
             //rigidbody2Dの速度ベクトルにx軸、y軸のベクトルを新しく代入(jumpPowerは物理演算の重力の影響でどんどん下がっていく)
@@ -195,9 +202,37 @@ public class ActorController : MonoBehaviour
         Vector2 velocity = rigidbody2D.velocity;
         // 変数velocityのxベクトルにxSpeedの値を代入。
         velocity.x = xSpeed;
+
+        //水中モードでの速度
+        if (inWaterMode)
+        {
+            velocity.x *= WaterModeDeceletate_X;
+            velocity.y *= WaterModeDeceletate_Y;
+        }
+
         // このオブジェクトのrigidbody2Dコンポーネントにvelocityを適応
-        rigidbody2D.velocity = velocity;
+            rigidbody2D.velocity = velocity;
     }
+
+    /// <summary>
+    /// 水中モードをセットする
+    /// </summary>
+    /// <param name="mode">true:水中にいる</param>
+    public void SetWaterMode(bool mode)
+    {
+        //水中モード
+        inWaterMode = mode;
+        // 水中での重力
+        if (inWaterMode)
+        {
+            rigidbody2D.gravityScale = 0.3f;
+        }
+        else
+        {
+            rigidbody2D.gravityScale = 1.0f;
+        }
+    }
+
     #endregion
 
     #region 戦闘関連
@@ -206,47 +241,47 @@ public class ActorController : MonoBehaviour
     /// ダメージを受ける際に呼び出される
     ///</sumary>
     /// <param name="damage">ダメージ量</param>
-    public void Damaged (int damage)
+    public void Damaged(int damage)
     {
         //撃破された後なら終了
         if (isDefeat)
             return;
 
-            //もし無敵時間中ならダメージ無効
-            if (invincibleTime > 0.0f)
-                return;
+        //もし無敵時間中ならダメージ無効
+        if (invincibleTime > 0.0f)
+            return;
 
-            //ダメージ処理
-            nowHP -= damage;
+        //ダメージ処理
+        nowHP -= damage;
 
-            //HP0ならゲームオーバー処理
-            if (nowHP <= 0)
-            {
-                isDefeat = true;
-                // 被撃破演出開始
-                actorSprite.StartDefeatAnim();
-                //物理演算を停止
-                rigidbody2D.velocity = Vector2.zero;
-                xSpeed = 0.0f;
-                rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-                return;
-            }
+        //HP0ならゲームオーバー処理
+        if (nowHP <= 0)
+        {
+            isDefeat = true;
+            // 被撃破演出開始
+            actorSprite.StartDefeatAnim();
+            //物理演算を停止
+            rigidbody2D.velocity = Vector2.zero;
+            xSpeed = 0.0f;
+            rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            return;
+        }
 
-            //スタン硬直
-            remainStuckTime = StuckTime;
-            actorSprite.stuckMode = true;
+        //スタン硬直
+        remainStuckTime = StuckTime;
+        actorSprite.stuckMode = true;
 
-            //ノックバック処理
-            //ノックバック力・方向決定
-            float knockBackPower = KnockBack_X;
-            if (rightFacing)
-                knockBackPower *= -1.0f;
-            //　ノックバック適用
-            xSpeed = knockBackPower;
+        //ノックバック処理
+        //ノックバック力・方向決定
+        float knockBackPower = KnockBack_X;
+        if (rightFacing)
+            knockBackPower *= -1.0f;
+        //　ノックバック適用
+        xSpeed = knockBackPower;
 
-            //無敵時間発生
-            invincibleTime = InvicibleTime;
-            if (invincibleTime > 0.0f)
+        //無敵時間発生
+        invincibleTime = InvicibleTime;
+        if (invincibleTime > 0.0f)
             actorSprite.StartBlinking();
     }
 

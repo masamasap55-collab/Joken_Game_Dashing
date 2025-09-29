@@ -122,7 +122,10 @@ public class EnemyBase : MonoBehaviour
                 spriteRenderer.color = COL_DAMAGED; //赤色に変更
                 damageTween = spriteRenderer.DOColor(COL_DEFAULT, 1.0f); //DoTweenで徐々に戻す
             }
-
+            if (!rightFacing) //左向いてるときのノックバック
+                rigidbody2D.velocity += new Vector2(5.0f, 3.0f);
+            else
+                rigidbody2D.velocity += new Vector2(-5.0f, 3.0f);
         }
 
         return true;

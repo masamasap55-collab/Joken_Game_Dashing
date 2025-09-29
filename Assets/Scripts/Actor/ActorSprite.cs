@@ -14,6 +14,7 @@ public class ActorSprite : MonoBehaviour
     //画像素材参照
     public List<Sprite> walkAnimationRes; // 歩行アニメーション(装備別*コマ数) List<Sprite>は2D画像を格納する可変長の配列の型 walkAnimationResourse
     public List<Sprite> stuckSpriteRes; //スタンスプライト(装備別)
+    public List<Sprite> swimAnimationRes; //水泳アニメ(コマ数)
 
     //各種変数
     private float walkAnimationTime; // 歩行アニメーション経過時間
@@ -54,17 +55,24 @@ public class ActorSprite : MonoBehaviour
             walkAnimationFrame = 0;
 
         //歩行アニメーションコマ数を計算
-            if (walkAnimationTime >= WalkAnimationSpan)
-            {
-                walkAnimationTime -= WalkAnimationSpan;
-                //アニメーション画像を次に
-                walkAnimationFrame++;
-                //アニメーション画像の番号を超えたら一巡させる。
-                if (walkAnimationFrame >= WalkAnimationNum)
-                    walkAnimationFrame = 0;
-            }
+        if (walkAnimationTime >= WalkAnimationSpan)
+        {
+            walkAnimationTime -= WalkAnimationSpan;
+            //アニメーション画像を次に
+            walkAnimationFrame++;
+            //アニメーション画像の番号を超えたら一巡させる。
+            if (walkAnimationFrame >= WalkAnimationNum)
+                walkAnimationFrame = 0;
+        }
         //歩行アニメーションの画像を更新
-        spriteRenderer.sprite = walkAnimationRes[walkAnimationFrame];
+        if (!actorController.inWaterMode)
+        { //地上
+            spriteRenderer.sprite = walkAnimationRes[walkAnimationFrame];
+        }
+        else
+        { //水中
+            spriteRenderer.sprite = swimAnimationRes[walkAnimationFrame];
+        }
     }
 
     /// <summary>
