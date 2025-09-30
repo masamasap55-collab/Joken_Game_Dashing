@@ -406,6 +406,7 @@ MonoBehaviour:
   actorController: {fileID: 0}
   cameraController: {fileID: 0}
   initArea: {fileID: 0}
+  bossBGMClip: {fileID: 0}
 --- !u!82 &4914945656888661815
 AudioSource:
   m_ObjectHideFlags: 0
