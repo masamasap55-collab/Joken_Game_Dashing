@@ -123,3 +123,64 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &687980496
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3863666959919775968, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_Name
+      value: StageManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.20402908
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.6652412
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3863666959919775969, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4914945656888661815, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
+      propertyPath: MinDistance
+      value: 2.1223211
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4aa34d05e6d592b41adc5738cc03cce7, type: 3}
