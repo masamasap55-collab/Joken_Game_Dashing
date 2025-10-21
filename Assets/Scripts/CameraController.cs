@@ -12,6 +12,11 @@ public class CameraController : MonoBehaviour
     //各種変数
     private Vector2 basePos; //基準座標
     private Rect limitQuad; //　有効中のカメラ移動制限範囲
+    [Header("どのくらいx座標をずらすか")]   
+    [SerializeField] private float offsetX;
+
+    [Header("どのくらいy座標をずらすか")]
+    [SerializeField] private float offsetY;
 
     //定数定義
     public const float BG_Scroll_Speed = 0.5f; //背景スクロール速度(1.0fでカメラと同じ速度)
@@ -46,6 +51,8 @@ public class CameraController : MonoBehaviour
         //(カメラが移動する半分の速度で移動する0.5fだから)
         Vector3 bgPos = transform.localPosition * BG_Scroll_Speed; //今のカメラの座標に0.5f
         bgPos.z = backGroundTransform.position.z; //z座標はそのまま
+        bgPos.x += offsetX;
+        bgPos.y += offsetY;
         backGroundTransform.position = bgPos; //カメラの座標の半分を代入
     }
 
