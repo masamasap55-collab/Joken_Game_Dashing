@@ -9,6 +9,7 @@ using UnityEngine;
 public class ActorController : MonoBehaviour
 {
     //変数宣言部
+    private bool isWalking = false;
 
     //オブジェクト・コンポーネント参照
     private Rigidbody2D rigidbody2D; //このオブジェクトのRigidbody2Dコンポーネントを参照。(まだ入れ物で中身は空っぽ)
@@ -17,6 +18,7 @@ public class ActorController : MonoBehaviour
     private ActorSprite actorSprite; //アクタースプライト設定クラス
     public CameraController cameraController; //カメラ制御クラス (今回はGetComponentをしてないのでこの変数にInspectorからセット参照してる)
     public GameObject weaponBulletPrefab; //弾プレハブ
+    private AudioSource audioSource; //オーディオ   
 
     //設定項目
     [Header("true:足滑るモード")]
@@ -36,6 +38,13 @@ public class ActorController : MonoBehaviour
     private float invincibleTime; //残り無敵時間(秒)
     [HideInInspector] public bool isDefeat; // true:撃破された(ゲームオーバー)
     [HideInInspector] public bool inWaterMode; //true:水中モード（メソッドから変更）
+    public float stepInterval = 0.1f; //足音の間隔
+    private Coroutine footstepCoroutine;
+
+    //各種効果音
+    [Header("ジャンプ音")] public AudioClip jumpSound;
+    [Header("やられ音")] public AudioClip damagedSound;
+    [Header("あるき音")] public AudioClip walkSound;
 
     //定数定義
     private const int InitialHP = 20; //　初期HP(最大HP)
@@ -53,6 +62,7 @@ public class ActorController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         groundSensor = GetComponentInChildren<ActorGroundSensor>(); // InChildrenで子オブジェクトからコンポーネントを参照取得。
         actorSprite = GetComponent<ActorSprite>();
+        audioSource = GetComponent<AudioSource>();
 
         //配下コンポーネントを初期化　(先にActorControllerを初期化したいからここでActorSpriteを初期化している)
         actorSprite.Init(this); //thisでこのscriptをコンポーネントとして渡せる。
@@ -69,7 +79,7 @@ public class ActorController : MonoBehaviour
     void Update()
     {
         //撃破された後なら終了
-        if(isDefeat)
+        if (isDefeat)
             return;
 
         //　無敵時間が残っているなら減少
@@ -127,26 +137,42 @@ public class ActorController : MonoBehaviour
     /// </summary>
     private void MoveUpdate()
     {
+        bool moving = false;
         //右
         if (Input.GetKey(KeyCode.RightArrow))
         {
             xSpeed = 6.0f;
             rightFacing = true; //右向きのフラグon
-            //spriteRendererコンポーネントにflipXというものがあり、trueだと初期の画像を反転
+                                //spriteRendererコンポーネントにflipXというものがあり、trueだと初期の画像を反転
             spriteRenderer.flipX = false;
+            moving = true;
         }
         //左
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
             xSpeed = -6.0f;
             rightFacing = false; //右向きのフラグoff
-            //trueだと画像反転
+                                 //trueだと画像反転
             spriteRenderer.flipX = true;
+            moving = true;
         }
         //何もしてない
         else
         {
             xSpeed = 0.0f;
+        }
+
+        // 足音の再生制御
+        if (moving && !isWalking)
+        {
+            isWalking = true;
+            footstepCoroutine = StartCoroutine(PlayFootsteps());
+        }
+        else if (!moving && isWalking)
+        {
+            isWalking = false;
+            if (footstepCoroutine != null)
+                StopCoroutine(footstepCoroutine);
         }
     }
 
@@ -164,7 +190,9 @@ public class ActorController : MonoBehaviour
             //接地していないなら終了(水中であれば続行)
             if (!groundSensor.isGround && !inWaterMode)
                 return;
-            
+
+            //効果音
+            audioSource.PlayOneShot(jumpSound);
             //ジャンプ力を計算
             float jumpPower = 10.0f;
             //rigidbody2Dの速度ベクトルにx軸、y軸のベクトルを新しく代入(jumpPowerは物理演算の重力の影響でどんどん下がっていく)
@@ -208,14 +236,14 @@ public class ActorController : MonoBehaviour
             velocity.x = Mathf.Lerp(xSpeed, rigidbody2D.velocity.x, 0.99f);
 
         //水中モードでの速度
-            if (inWaterMode)
-            {
-                velocity.x *= WaterModeDeceletate_X;
-                velocity.y *= WaterModeDeceletate_Y;
-            }
+        if (inWaterMode)
+        {
+            velocity.x *= WaterModeDeceletate_X;
+            velocity.y *= WaterModeDeceletate_Y;
+        }
 
         // このオブジェクトのrigidbody2Dコンポーネントにvelocityを適応
-            rigidbody2D.velocity = velocity;
+        rigidbody2D.velocity = velocity;
     }
 
     /// <summary>
@@ -257,6 +285,8 @@ public class ActorController : MonoBehaviour
 
         //ダメージ処理
         nowHP -= damage;
+        //効果音
+        audioSource.PlayOneShot(damagedSound);
 
         //HP0ならゲームオーバー処理
         if (nowHP <= 0)
@@ -329,6 +359,22 @@ public class ActorController : MonoBehaviour
             bulletAngle, // 角度
             1, //ダメージ量
             5.0f); //存在時間
+    }
+    
+    /// <summary>
+    /// 効果音のループメソッド
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator PlayFootsteps()
+    {
+        while (isWalking)
+        {
+            // 地面にいる時だけ足音を鳴らす（空中で鳴らさないように）
+            if (groundSensor.isGround)
+                audioSource.PlayOneShot(walkSound);
+
+            yield return new WaitForSeconds(stepInterval); // 0.1秒待つ
+        }
     }
 
     #endregion

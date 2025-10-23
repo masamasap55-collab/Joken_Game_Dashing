@@ -48,11 +48,26 @@ public class ActorSprite : MonoBehaviour
             return;
         }
 
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            if (!actorController.inWaterMode)
+            {
+                spriteRenderer.sprite = walkAnimationRes[1];
+                return;
+            }
+            else
+            {
+                spriteRenderer.sprite = swimAnimationRes[1];
+                return;
+            }
+        }
+            
+            
         //歩行アニメーション時間を経過(横移動してるときのみ計算)
-        if (Mathf.Abs(actorController.xSpeed) > 0.0f) //Mathf.Abs()で絶対値
-            walkAnimationTime += Time.deltaTime; //経過秒数を加算
-        else if (actorController.xSpeed == 0) //止まってるときは立ち絵0にする。
-            walkAnimationFrame = 0;
+            if (Mathf.Abs(actorController.xSpeed) > 0.0f) //Mathf.Abs()で絶対値
+                walkAnimationTime += Time.deltaTime; //経過秒数を加算
+            else if (actorController.xSpeed == 0) //止まってるときは立ち絵0にする。
+                walkAnimationFrame = 0;
 
         //歩行アニメーションコマ数を計算
         if (walkAnimationTime >= WalkAnimationSpan)
