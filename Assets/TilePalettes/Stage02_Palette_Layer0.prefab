@@ -11,7 +11,11 @@ GameObject:
   - component: {fileID: 7883150346042067025}
   - component: {fileID: 4510418135333778092}
   m_Layer: 0
+<<<<<<<< HEAD:Assets/TilePalettes/Stage02_Palette_Layer0.prefab
   m_Name: Stage02_Palette_Layer0
+========
+  m_Name: Stage01_Palette_Layer0
+>>>>>>>> a1d327a2725a0dcdb9baa2fe7d055ab39e769aa1:Assets/TilePalettes/Stage01_Palette_Layer0.prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
