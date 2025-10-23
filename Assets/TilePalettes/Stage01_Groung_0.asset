@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: Stage01_Groung_0
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -289650158, guid: ddd02b4c2c034ad459b2fe6957b75292, type: 3}
+  m_Sprite: {fileID: -289650158, guid: d3b27376b7229884d9e8053748d3f5c7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
