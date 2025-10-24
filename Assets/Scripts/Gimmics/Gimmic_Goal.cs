@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI; // UIを扱うために必要
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class Gimmic_Goal : MonoBehaviour
@@ -65,8 +66,8 @@ public class Gimmic_Goal : MonoBehaviour
             clearText.gameObject.SetActive(true);
         }
 
-        // ここでステージ遷移などを続けて呼ぶことも可能
-        // yield return new WaitForSeconds(2f);
-        // SceneManager.LoadScene("NextStage");
+        //ここでステージ遷移などを続けて呼ぶことも可能
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene(0);
     }
 }

@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// アクター操作・制御クラス
@@ -19,6 +20,7 @@ public class ActorController : MonoBehaviour
     public CameraController cameraController; //カメラ制御クラス (今回はGetComponentをしてないのでこの変数にInspectorからセット参照してる)
     public GameObject weaponBulletPrefab; //弾プレハブ
     private AudioSource audioSource; //オーディオ   
+    public TextMeshProUGUI faildText; //負けたときの文字
 
     //設定項目
     [Header("true:足滑るモード")]
@@ -57,6 +59,7 @@ public class ActorController : MonoBehaviour
     // {Start} オブジェクト有効時　１回だけ実行されるメソッド
     void Start()
     {
+        faildText.gameObject.SetActive(false);
         //コンポーネント参照取得。(ここで初めてこのオブジェクトのコンポーネントが変数に入る)
         rigidbody2D = GetComponent<Rigidbody2D>(); //これでrigidbody2D === このオブジェクトのコンポーネント となっている。(ポインタ参照みたいなもん)
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -78,6 +81,16 @@ public class ActorController : MonoBehaviour
     // {Update}　１フレームごとに一度ずつ実行されるメソッド
     void Update()
     {
+        //リセットの処理
+        if (Input.GetKeyDown(KeyCode.L) && nowHP <= 0)
+        {
+            SceneManager.LoadScene(0);
+        }
+        if (Input.GetKeyDown(KeyCode.R) && nowHP <= 0)
+        {
+            RestartScene();
+        }
+
         //撃破された後なら終了
         if (isDefeat)
             return;
@@ -298,6 +311,7 @@ public class ActorController : MonoBehaviour
             rigidbody2D.velocity = Vector2.zero;
             xSpeed = 0.0f;
             rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            StartCoroutine(ShowAfterDelay());
             return;
         }
 
@@ -360,7 +374,7 @@ public class ActorController : MonoBehaviour
             1, //ダメージ量
             5.0f); //存在時間
     }
-    
+
     /// <summary>
     /// 効果音のループメソッド
     /// </summary>
@@ -377,6 +391,18 @@ public class ActorController : MonoBehaviour
         }
     }
 
+    void RestartScene()
+    {
+        // 現在のシーンを再読み込み
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
+    }
+
+    private IEnumerator ShowAfterDelay()
+    {
+        yield return new WaitForSeconds(1f); // 1秒待つ
+        faildText.gameObject.SetActive(true); // 一気に表示
+    }
     #endregion
 
 
