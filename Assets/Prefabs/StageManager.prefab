@@ -170,6 +170,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backGroundTransform: {fileID: 3863666960686763394}
+  offsetX: 0
+  offsetY: 0
 --- !u!1 &3863666959714982269
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +367,7 @@ GameObject:
   - component: {fileID: 3863666959919775969}
   - component: {fileID: 3863666959919775970}
   - component: {fileID: 4914945656888661815}
+  - component: {fileID: 8171646102464729896}
   m_Layer: 0
   m_Name: StageManager
   m_TagString: Untagged
@@ -503,6 +506,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8171646102464729896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3863666959919775968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 536907cbb2066a3458cbd5b49b00426c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bgmSource: {fileID: 4914945656888661815}
+  player: {fileID: 3863666960629247792}
+  goalManager: {fileID: 0}
 --- !u!1 &3863666960013325281
 GameObject:
   m_ObjectHideFlags: 0
@@ -921,8 +939,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccc0cf24c51b3ab4fa328c8de55aa0ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isGameStarting: 0
   cameraController: {fileID: 3863666959676999073}
   weaponBulletPrefab: {fileID: 5842504754360891596, guid: c009d98f336444f4ba18dd0eaee3697a, type: 3}
+  faildText: {fileID: 0}
   icyGroundMode: 0
   nowHP: 0
   maxHP: 0
@@ -930,6 +950,14 @@ MonoBehaviour:
   rightFacing: 0
   isDefeat: 0
   inWaterMode: 0
+  stepInterval: 0.1
+  jumpSound: {fileID: 8300000, guid: 76d18811c0025ee4a901214ad40d817d, type: 3}
+  damagedSound: {fileID: 8300000, guid: e92ca09210daf74489d636442e2d4e3d, type: 3}
+  walkSound: {fileID: 8300000, guid: 2ebf679742c22984db8d49e39f7cb8e0, type: 3}
+  retrySound: {fileID: 8300000, guid: 2552d2d2461dea3488d6f036084016cf, type: 3}
+  gameOverSound: {fileID: 8300000, guid: 66a883951b7358e4588ea8b93183cfcb, type: 3}
+  shotSound: {fileID: 8300000, guid: 59782e73e1dd32d409b52ea8e50867e2, type: 3}
+  jumpPower: 10
 --- !u!50 &3863666960629247796
 Rigidbody2D:
   serializedVersion: 4

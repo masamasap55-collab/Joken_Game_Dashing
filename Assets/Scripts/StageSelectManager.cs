@@ -9,6 +9,23 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class StageSelectManager : MonoBehaviour
 {
+    public AudioSource bgmSource;
+
+
+
+    void Start()
+    {
+        bgmSource.loop = true;
+    }
+
+    void Update()
+    {
+        if (!bgmSource.isPlaying)
+        {
+            bgmSource.Play();
+        }
+    }
+
     /// <summary>
     /// ステージ選択ボタン押下時処理
     /// </summary>

@@ -14,6 +14,7 @@ public class EnemyBase : MonoBehaviour
     protected Rigidbody2D rigidbody2D; //RigidBody2D
     protected SpriteRenderer spriteRenderer; //　敵スプライト
     protected Transform actorTransform; //主人公(アクター)のTransform
+    private AudioSource audioSource;
 
     //画像素材
     public Sprite sprite_Defeat; // 被撃破スプライト
@@ -24,6 +25,7 @@ public class EnemyBase : MonoBehaviour
     [Header("接触時アクターへのダメージ")] public int touchDamage;
     [Header("ボス敵フラグ(ONでボス敵として扱う。1ステージに1体のみ)")] public bool isBoss;
     [Header("ボス用被撃破パーティクルPrefab")] public GameObject bossDefeatParticlePrefab;
+    [Header("ダメージ受けた音")] public AudioClip damagedSound;
 
     //その他データ
     [HideInInspector] public int nowHP; //残りHP
@@ -48,6 +50,7 @@ public class EnemyBase : MonoBehaviour
         actorTransform = areaManager.stageManager.actorController.transform;
         rigidbody2D = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
 
         //変数初期化 
         rigidbody2D.freezeRotation = true;   
@@ -85,6 +88,7 @@ public class EnemyBase : MonoBehaviour
     {
         //　ダメージ処理
         nowHP -= damage;
+        audioSource.PlayOneShot(damagedSound);
 
         if (nowHP <= 0.0f)
         { //HP0の場合

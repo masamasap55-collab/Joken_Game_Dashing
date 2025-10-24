@@ -6,6 +6,7 @@ using TMPro;
 
 public class Gimmic_Goal : MonoBehaviour
 {
+    private AudioSource audioSource;
     [Header("フェード用の白いImage")]
     [SerializeField] private Image fadeImage;
 
@@ -15,10 +16,14 @@ public class Gimmic_Goal : MonoBehaviour
     [Header("フェードにかける時間（秒）")]
     [SerializeField] private float fadeDuration = 0.6f;
 
-    private bool isClearing = false;
+    [Header("クリア音")]
+    public AudioClip clearSound;
+
+    public bool isClearing = false;
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         if (fadeImage != null)
         {
             // 最初は透明にしておく
@@ -35,6 +40,7 @@ public class Gimmic_Goal : MonoBehaviour
     {
         if (!isClearing && collision.CompareTag("Actor"))
         {
+            audioSource.PlayOneShot(clearSound);
             isClearing = true;
             StartCoroutine(FadeAndShowClear());
         }

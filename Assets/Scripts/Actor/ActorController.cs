@@ -11,6 +11,7 @@ public class ActorController : MonoBehaviour
 {
     //変数宣言部
     private bool isWalking = false;
+    public bool isGameStarting = false;
 
     //オブジェクト・コンポーネント参照
     private Rigidbody2D rigidbody2D; //このオブジェクトのRigidbody2Dコンポーネントを参照。(まだ入れ物で中身は空っぽ)
@@ -47,6 +48,9 @@ public class ActorController : MonoBehaviour
     [Header("ジャンプ音")] public AudioClip jumpSound;
     [Header("やられ音")] public AudioClip damagedSound;
     [Header("あるき音")] public AudioClip walkSound;
+    [Header("リトライ音")] public AudioClip retrySound;
+    [Header("ゲームオーバー")] public AudioClip gameOverSound;
+    [Header("射撃音")] public AudioClip shotSound;
 
     //定数定義
     private const int InitialHP = 20; //　初期HP(最大HP)
@@ -62,6 +66,7 @@ public class ActorController : MonoBehaviour
     // {Start} オブジェクト有効時　１回だけ実行されるメソッド
     void Start()
     {
+        isGameStarting = false;
         faildText.gameObject.SetActive(false);
         //コンポーネント参照取得。(ここで初めてこのオブジェクトのコンポーネントが変数に入る)
         rigidbody2D = GetComponent<Rigidbody2D>(); //これでrigidbody2D === このオブジェクトのコンポーネント となっている。(ポインタ参照みたいなもん)
@@ -79,11 +84,17 @@ public class ActorController : MonoBehaviour
         //変数の初期化
         rightFacing = true; //最初は右向き
         nowHP = maxHP = InitialHP; //　初期HP
+
+        audioSource.PlayOneShot(retrySound);
     }
 
     // {Update}　１フレームごとに一度ずつ実行されるメソッド
     void Update()
     {
+        if (nowHP > 0 && Input.GetKeyDown(KeyCode.Space))
+        {
+            isGameStarting = true;
+        }
         //リセットの処理
         if (Input.GetKeyDown(KeyCode.L) && nowHP <= 0)
         {
@@ -96,7 +107,10 @@ public class ActorController : MonoBehaviour
 
         //撃破された後なら終了
         if (isDefeat)
+        {
             return;
+        }
+            
 
         //　無敵時間が残っているなら減少
         if (invincibleTime > 0.0f)
@@ -131,7 +145,7 @@ public class ActorController : MonoBehaviour
 
         //坂道で滑らなくなる処理
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation; //rigidbody2Dの回転を常時停止
-        if (groundSensor.isGround && !Input.GetKey(KeyCode.UpArrow)) //地上にいるとき　かつ　ジャンプ中でないとき
+        if (groundSensor.isGround && !Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space)) //地上にいるとき　かつ　ジャンプ中でないとき
         {
             if (rigidbody2D.velocity.y > 0.0f) //ジャンプ以外はy方向の移動はしないようにする。(ずっと地面にはりつけている感じ)
             {
@@ -155,7 +169,7 @@ public class ActorController : MonoBehaviour
     {
         bool moving = false;
         //右
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             xSpeed = 6.0f;
             rightFacing = true; //右向きのフラグon
@@ -164,7 +178,7 @@ public class ActorController : MonoBehaviour
             moving = true;
         }
         //左
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             xSpeed = -6.0f;
             rightFacing = false; //右向きのフラグoff
@@ -201,7 +215,7 @@ public class ActorController : MonoBehaviour
 
 
         //ジャンプ操作
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
         {//ジャンプ開始
             //接地していないなら終了(水中であれば続行)
             if (!groundSensor.isGround && !inWaterMode)
@@ -217,7 +231,7 @@ public class ActorController : MonoBehaviour
             //飛んでから、0.25秒受付時間設定
             remainJumpTime = 0.25f;
         }
-        else if (Input.GetKey(KeyCode.UpArrow))
+        else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
         {//ジャンプ中
 
             if (remainJumpTime <= 0.0f)
@@ -230,7 +244,7 @@ public class ActorController : MonoBehaviour
             //ジャンプ力加算を適応
             rigidbody2D.velocity += new Vector2(0.0f, jumpAddPower);
         }
-        else if (Input.GetKeyUp(KeyCode.UpArrow))
+        else if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
         {//ジャンプ入力終了
             remainJumpTime = -1.0f;
         }
@@ -346,7 +360,7 @@ public class ActorController : MonoBehaviour
     public void StartShotAction()
     {
         //　攻撃ボタンが入力されていないなら終了
-        if (!Input.GetKeyDown(KeyCode.Z))
+        if (!Input.GetKeyDown(KeyCode.Z) && !Input.GetMouseButtonDown(0) && !Input.GetKeyDown(KeyCode.K))
             return;
 
         // このメソッド内で選択武器別のメソッドの呼び分けやエネルギー消費処理を行う。
@@ -364,6 +378,8 @@ public class ActorController : MonoBehaviour
         // アクターが左向きなら弾も左向きに進む
         if (!rightFacing)
             bulletAngle = 180.0f;
+        //効果音
+        audioSource.PlayOneShot(shotSound);
 
         // 弾丸オブジェクト生成・設定
         GameObject obj = Instantiate( // オブジェクト新規生成
@@ -404,6 +420,7 @@ public class ActorController : MonoBehaviour
     private IEnumerator ShowAfterDelay()
     {
         yield return new WaitForSeconds(1f); // 1秒待つ
+        audioSource.PlayOneShot(gameOverSound);
         faildText.gameObject.SetActive(true); // 一気に表示
     }
     #endregion
