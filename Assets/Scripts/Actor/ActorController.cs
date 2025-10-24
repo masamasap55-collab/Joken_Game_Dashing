@@ -56,6 +56,9 @@ public class ActorController : MonoBehaviour
     private const float WaterModeDeceletate_X = 0.8f; // 水中でのX方向速度倍率
     private const float WaterModeDeceletate_Y = 0.92f; //水中でのy方向速度倍率  
 
+    [Header("ジャンプ力")]
+    public float jumpPower = 10.0f;
+
     // {Start} オブジェクト有効時　１回だけ実行されるメソッド
     void Start()
     {
@@ -223,7 +226,7 @@ public class ActorController : MonoBehaviour
                 return; //接地してるなら終了
 
             //ジャンプ力加算を計算
-            float jumpAddPower = 30.0f * Time.deltaTime; //Time.deltaTimeでFPSによらずに数値の秒数加算が可能。
+            float jumpAddPower = jumpPower * Time.deltaTime; //Time.deltaTimeでFPSによらずに数値の秒数加算が可能。
             //ジャンプ力加算を適応
             rigidbody2D.velocity += new Vector2(0.0f, jumpAddPower);
         }
