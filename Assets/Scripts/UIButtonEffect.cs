@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections;
 
 public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -10,9 +11,9 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public AudioClip clickClip;
 
     [Header("アニメーション設定")]
-    public float hoverScale = 1.1f;     // ホバー時の拡大率
-    public float clickScale = 0.9f;     // クリック時の縮小率
-    public float animSpeed = 8f;        // スケールアニメ速度
+    public float hoverScale = 1.1f;
+    public float clickScale = 0.9f;
+    public float animSpeed = 8f;
 
     private Vector3 defaultScale;
     private Vector3 targetScale;
@@ -26,34 +27,45 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     void Update()
     {
-        // スムーズにスケール補間
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * animSpeed);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        isHovering = true;
-        targetScale = defaultScale * hoverScale;
-        if (audioSource && hoverClip)
-            audioSource.PlayOneShot(hoverClip);
+        SetHover(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        isHovering = false;
-        targetScale = defaultScale;
+        SetHover(false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        ClickEffect();
+    }
+
+    // 🔽 外部からも呼び出せるように変更
+    public void SetHover(bool hover)
+    {
+        if (hover == isHovering) return; // 同じ状態なら何もしない
+
+        isHovering = hover;
+        targetScale = hover ? defaultScale * hoverScale : defaultScale;
+
+        if (hover && audioSource && hoverClip)
+            audioSource.PlayOneShot(hoverClip);
+    }
+
+    public void ClickEffect()
+    {
         if (audioSource && clickClip)
             audioSource.PlayOneShot(clickClip);
-        // 一瞬小さくしてすぐ戻す
         StopAllCoroutines();
         StartCoroutine(ClickAnimation());
     }
 
-    private System.Collections.IEnumerator ClickAnimation()
+    private IEnumerator ClickAnimation()
     {
         targetScale = defaultScale * clickScale;
         yield return new WaitForSeconds(0.1f);

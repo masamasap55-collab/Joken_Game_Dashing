@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// アクター操作・制御クラス
@@ -63,9 +64,33 @@ public class ActorController : MonoBehaviour
     [Header("ジャンプ力")]
     public float jumpPower = 10.0f;
 
+    private PlayerControls inputActions;
+    private Vector2 moveInput;
+    private bool jumpPressed;
+    private bool attackPressed;
+    private bool startPressed;
+    private bool retryPressed;
+    private bool stageSelectPressed;
+
     // {Start} オブジェクト有効時　１回だけ実行されるメソッド
     void Start()
     {
+        inputActions = new PlayerControls();
+        inputActions.Player.Enable();
+
+        // 各操作のコールバック登録
+        inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        inputActions.Player.Jump.performed += ctx => jumpPressed = true;
+        inputActions.Player.Jump.canceled += ctx => jumpPressed = false;
+
+        inputActions.Player.Attack.performed += ctx => attackPressed = true;
+        inputActions.Player.Attack.canceled += ctx => attackPressed = false;
+
+        inputActions.Player.StartGame.performed += ctx => startPressed = true;
+        inputActions.Player.Retry.performed += ctx => retryPressed = true;
+        inputActions.Player.StageSelect.performed += ctx => stageSelectPressed = true;
         isGameStarting = false;
         faildText.gameObject.SetActive(false);
         //コンポーネント参照取得。(ここで初めてこのオブジェクトのコンポーネントが変数に入る)
@@ -91,18 +116,22 @@ public class ActorController : MonoBehaviour
     // {Update}　１フレームごとに一度ずつ実行されるメソッド
     void Update()
     {
-        if (nowHP > 0 && Input.GetKeyDown(KeyCode.Space))
+        if (nowHP > 0 && (Input.GetKeyDown(KeyCode.Space) || Input.GetButton("Jump")))
         {
             isGameStarting = true;
+            startPressed = false;
         }
-        //リセットの処理
-        if (Input.GetKeyDown(KeyCode.L) && nowHP <= 0)
+
+        if ((Input.GetKeyDown(KeyCode.L) || stageSelectPressed) && nowHP <= 0)
         {
             SceneManager.LoadScene(0);
+            stageSelectPressed = false;
         }
-        if (Input.GetKeyDown(KeyCode.R) && nowHP <= 0)
+
+        if ((Input.GetKeyDown(KeyCode.R) || retryPressed) && nowHP <= 0)
         {
             RestartScene();
+            retryPressed = false;
         }
 
         //撃破された後なら終了
@@ -145,7 +174,7 @@ public class ActorController : MonoBehaviour
 
         //坂道で滑らなくなる処理
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation; //rigidbody2Dの回転を常時停止
-        if (groundSensor.isGround && !Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space)) //地上にいるとき　かつ　ジャンプ中でないとき
+        if (groundSensor.isGround && !Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.Space) && !Input.GetButton("Jump")) //地上にいるとき　かつ　ジャンプ中でないとき
         {
             if (rigidbody2D.velocity.y > 0.0f) //ジャンプ以外はy方向の移動はしないようにする。(ずっと地面にはりつけている感じ)
             {
@@ -168,31 +197,26 @@ public class ActorController : MonoBehaviour
     private void MoveUpdate()
     {
         bool moving = false;
-        //右
+        float moveX = moveInput.x; // ← 新Input Systemの入力を取得
+
+        // 旧Inputも併用
         if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-        {
-            xSpeed = 6.0f;
-            rightFacing = true; //右向きのフラグon
-                                //spriteRendererコンポーネントにflipXというものがあり、trueだと初期の画像を反転
-            spriteRenderer.flipX = false;
-            moving = true;
-        }
-        //左
+            moveX = 1f;
         else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+            moveX = -1f;
+
+        if (Mathf.Abs(moveX) > 0.1f)
         {
-            xSpeed = -6.0f;
-            rightFacing = false; //右向きのフラグoff
-                                 //trueだと画像反転
-            spriteRenderer.flipX = true;
+            xSpeed = moveX * 6.0f;
+            rightFacing = moveX > 0;
+            spriteRenderer.flipX = !rightFacing;
             moving = true;
         }
-        //何もしてない
         else
         {
-            xSpeed = 0.0f;
+            xSpeed = 0f;
         }
 
-        // 足音の再生制御
         if (moving && !isWalking)
         {
             isWalking = true;
@@ -206,52 +230,50 @@ public class ActorController : MonoBehaviour
         }
     }
 
+
     private void JumpUpdate()
     {
+        
         //空中でのジャンプ入力受付時間を経過秒数で減少
         if (remainJumpTime > 0.0f)
-            remainJumpTime -= Time.deltaTime; //Time.deltaTimeで1Fの経過秒数を参照
+            remainJumpTime -= Time.deltaTime; // Time.deltaTimeで1Fの経過秒数を参照
 
+        // 入力をまとめて取得（KeyboardでもGamePadでも対応しやすくする）
+        bool jumpInput = Input.GetButton("Jump") || 
+                        Input.GetKey(KeyCode.UpArrow) || 
+                        Input.GetKey(KeyCode.W) || 
+                        Input.GetKey(KeyCode.Space);
 
-
-        //ジャンプ操作
-        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
-        {//ジャンプ開始
+        // ジャンプ開始
+        if (jumpInput && remainJumpTime <= 0.0f)
+        {
             //接地していないなら終了(水中であれば続行)
             if (!groundSensor.isGround && !inWaterMode)
                 return;
 
             //効果音
             audioSource.PlayOneShot(jumpSound);
-            //ジャンプ力を計算
-            float jumpPower = 10.0f;
-            //rigidbody2Dの速度ベクトルにx軸、y軸のベクトルを新しく代入(jumpPowerは物理演算の重力の影響でどんどん下がっていく)
+
+            //初速ジャンプ
             rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpPower);
 
-            //飛んでから、0.25秒受付時間設定
+            //ジャンプ入力受付時間
             remainJumpTime = 0.25f;
         }
-        else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
-        {//ジャンプ中
-
-            if (remainJumpTime <= 0.0f)
-                return; //受付時間が残ってないなら終了
-            if (groundSensor.isGround)
-                return; //接地してるなら終了
-
-            //ジャンプ力加算を計算
-            float jumpAddPower = jumpPower * Time.deltaTime; //Time.deltaTimeでFPSによらずに数値の秒数加算が可能。
-            //ジャンプ力加算を適応
+        // ジャンプ継続中（押しっぱなし）
+        else if (jumpInput && remainJumpTime > 0.0f && !groundSensor.isGround)
+        {
+            float jumpAddPower = jumpPower * Time.deltaTime;
             rigidbody2D.velocity += new Vector2(0.0f, jumpAddPower);
         }
-        else if (Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
-        {//ジャンプ入力終了
+        // ジャンプ入力を離したとき
+        else if (!jumpInput)
+        {
             remainJumpTime = -1.0f;
         }
 
-
-
     }
+
 
     //{FixedUpdate} 物理演算をするたびに実行されるメソッド
     private void FixedUpdate()
@@ -359,14 +381,17 @@ public class ActorController : MonoBehaviour
     /// </summary>
     public void StartShotAction()
     {
-        //　攻撃ボタンが入力されていないなら終了
-        if (!Input.GetKeyDown(KeyCode.Z) && !Input.GetMouseButtonDown(0) && !Input.GetKeyDown(KeyCode.K))
+        if (!attackPressed &&
+            !Input.GetKeyDown(KeyCode.Z) &&
+            !Input.GetMouseButtonDown(0) &&
+            !Input.GetKeyDown(KeyCode.K))
             return;
 
-        // このメソッド内で選択武器別のメソッドの呼び分けやエネルギー消費処理を行う。
-        // 現在は初期武器のみなのでShotAction_Normalを呼び出すだけ
+        attackPressed = false; // 1回だけ発射するようリセット
+
         ShotAction_Normal();
     }
+
 
     /// <summary>
     /// 射撃アクション：通常攻撃

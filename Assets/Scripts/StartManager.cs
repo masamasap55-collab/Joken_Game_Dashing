@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class StartManager : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class StartManager : MonoBehaviour
     void Update()
     {
         // Spaceが押されたら開始
-        if (!gameStarted && Input.GetKeyDown(KeyCode.Space))
+        if (!gameStarted && (Input.GetKeyDown(KeyCode.Space) || Input.GetButton("Jump")))
         {
             gameStarted = true;
             StartCoroutine(StartSequence());
